@@ -1,7 +1,7 @@
 package gorotator
 
 const (
-	BytesInKB int64 = 1024
-	BytesInMB       = BytesInKB * 1024
-	BytesInGB       = BytesInMB * 1024
+	KB int64 = 1024
+	MB       = KB * 1024
+	GB       = MB * 1024
 )
