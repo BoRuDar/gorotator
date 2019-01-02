@@ -4,11 +4,17 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 )
 
 func New(cfg Config) (io.WriteCloser, error) {
 	err := checkOrCreateDir(cfg.PathToDir)
+	if err != nil {
+		return nil, err
+	}
+
+	sliceOfFiles, err := getRotatableFiles(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -27,13 +33,15 @@ func New(cfg Config) (io.WriteCloser, error) {
 		currentFile:     f,
 		currentFileSize: st.Size(),
 		mu:              &sync.Mutex{},
+		filesToWatch:    sliceOfFiles,
 		Config:          cfg,
 	}, nil
 }
 
 type FileRotator struct {
-	currentFile     *os.File
 	currentFileSize int64
+	currentFile     *os.File
+	filesToWatch    []string
 	mu              *sync.Mutex
 	Config
 }
@@ -74,6 +82,8 @@ func (r *FileRotator) rotate() error {
 		return err
 	}
 
+	r.filesToWatch = append(r.filesToWatch, newFileName)
+
 	err = os.Rename(oldFilePath, newFilePath)
 	if err != nil {
 		return err
@@ -88,7 +98,35 @@ func (r *FileRotator) rotate() error {
 	if err != nil {
 		return err
 	}
-
 	r.currentFileSize = s.Size()
+
+	err = r.checkOrDelete()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *FileRotator) checkOrDelete() error {
+	if len(r.filesToWatch)+1 <= r.MamNumberOfFiles {
+		return nil // nothing to do
+	}
+
+	sort.Slice(r.filesToWatch, func(i, j int) bool {
+		return r.filesToWatch[i] < r.filesToWatch[j]
+	})
+
+	absPathToFile, err := filepath.Abs(filepath.Join(r.PathToDir, r.filesToWatch[0]))
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(absPathToFile)
+	if err != nil {
+		return err
+	}
+
+	r.filesToWatch = r.filesToWatch[1:]
 	return nil
 }

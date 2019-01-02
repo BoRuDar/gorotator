@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -33,7 +34,35 @@ func newName(oldName string, isWindows bool) string {
 	t := time.Now()
 
 	if !isWindows {
-		return oldName + "." + time.Now().Format(time.RFC3339)
+		return fmt.Sprintf("%s.%s", oldName, t.Format(time.RFC3339Nano))
 	}
-	return fmt.Sprintf("%s_%sT%d.%d.%d", oldName, t.Format("2006-01-02"), t.Hour(), t.Minute(), t.Second())
+
+	// Windows doesn't support `:` in file names
+	// file will look like `file.log_2019-01-02T21.38.26_369788600`
+	return fmt.Sprintf(
+		"%s_%sT%d.%d.%d_%d",
+		oldName, t.Format("2006-01-02"), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(),
+	)
+}
+
+func getRotatableFiles(cfg Config) (sliceOfFiles []string, err error) {
+	absPathToDir, err := filepath.Abs(cfg.PathToDir)
+	if err != nil {
+		return nil, err
+	}
+
+	err = filepath.Walk(absPathToDir, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+
+		fileName := info.Name()
+		if strings.Contains(fileName, cfg.FileName) && fileName != cfg.FileName {
+			sliceOfFiles = append(sliceOfFiles, fileName)
+		}
+
+		return nil
+	})
+
+	return
 }
