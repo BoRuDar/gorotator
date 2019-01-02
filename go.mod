@@ -1,1 +1,1 @@
-module gorotator
+module github.com/BoRuDa/gorotator
