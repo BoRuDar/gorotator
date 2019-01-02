@@ -109,7 +109,7 @@ func (r *FileRotator) rotate() error {
 }
 
 func (r *FileRotator) checkOrDelete() error {
-	if len(r.filesToWatch)+1 <= r.MamNumberOfFiles {
+	if len(r.filesToWatch)+1 <= r.MaxNumberOfFiles {
 		return nil // nothing to do
 	}
 

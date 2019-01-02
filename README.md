@@ -16,7 +16,7 @@ func main() {
 		PathToDir:        "./testdir",
 		FileName:         "file.log",
 		MaxFileSize:      1 * gorotator.KB,
-		MamNumberOfFiles: 3,
+		MaxNumberOfFiles: 3,
 		IsWindows:        true,
 	})
 	if err != nil {
