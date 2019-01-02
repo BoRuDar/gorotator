@@ -1,4 +1,4 @@
-package main
+package gorotator
 
 import (
 	"fmt"

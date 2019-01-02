@@ -1,4 +1,4 @@
-package main
+package gorotator
 
 const (
 	BytesInKB int64 = 1024

@@ -1,4 +1,4 @@
-package main
+package gorotator
 
 type Config struct {
 	FileName         string
