@@ -1,5 +1,6 @@
 # gorotator
-The small lib for a file rotation.
+The small library for a file rotation.
+**Zero dependencies, only standart library.**
 
 ### Quick start
 ```golang
