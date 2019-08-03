@@ -9,7 +9,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/BoRuDa/gorotator"
+	"github.com/BoRuDar/gorotator"
 )
 
 func main() {
