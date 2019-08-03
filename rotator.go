@@ -29,7 +29,7 @@ func New(cfg Config) (io.WriteCloser, error) {
 		return nil, err
 	}
 
-	return &FileRotator{
+	return &fileRotator{
 		currentFile:     f,
 		currentFileSize: st.Size(),
 		mu:              &sync.Mutex{},
@@ -38,7 +38,7 @@ func New(cfg Config) (io.WriteCloser, error) {
 	}, nil
 }
 
-type FileRotator struct {
+type fileRotator struct {
 	currentFileSize int64
 	currentFile     *os.File
 	filesToWatch    []string
@@ -46,7 +46,7 @@ type FileRotator struct {
 	Config
 }
 
-func (r *FileRotator) Write(p []byte) (n int, err error) {
+func (r *fileRotator) Write(p []byte) (n int, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -61,11 +61,11 @@ func (r *FileRotator) Write(p []byte) (n int, err error) {
 	return
 }
 
-func (r FileRotator) Close() error {
+func (r fileRotator) Close() error {
 	return r.currentFile.Close()
 }
 
-func (r *FileRotator) rotate() error {
+func (r *fileRotator) rotate() error {
 	err := r.currentFile.Close()
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func (r *FileRotator) rotate() error {
 	return nil
 }
 
-func (r *FileRotator) checkOrDelete() error {
+func (r *fileRotator) checkOrDelete() error {
 	if len(r.filesToWatch)+1 <= r.MaxNumberOfFiles {
 		return nil // nothing to do
 	}
